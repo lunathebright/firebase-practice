@@ -1,8 +1,17 @@
 import React, { useState } from "react";
+import {
+  createUserWithEmailAndPassword,
+  signInWithPopup,
+} from "@firebase/auth";
+
+import { authService } from "../firebase";
+import { GoogleAuthProvider } from "firebase/auth";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [newAccount, setNewAccount] = useState(true);
+  const [error, setError] = useState();
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -13,12 +22,31 @@ const Auth = () => {
     }
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-
-    if (email && password) {
-      console.log("login");
+    try {
+      if (newAccount) {
+        const data = await createUserWithEmailAndPassword(
+          authService,
+          email,
+          password
+        );
+      } else {
+        const data = await createUserWithEmailAndPassword(
+          authService,
+          email,
+          password
+        );
+      }
+    } catch (error) {
+      setError(error);
     }
+  };
+  const toggleAccount = () => setNewAccount((prev) => !prev);
+  const onGoogleClick = async () => {
+    const provider = new GoogleAuthProvider();
+    const data = await signInWithPopup(authService, provider);
+    console.log(data);
   };
 
   return (
@@ -40,10 +68,16 @@ const Auth = () => {
           onChange={onChange}
           required
         />
-        <input type="submit" value="LogIn" />
+        <input type="submit" value={newAccount ? "Create Acoount" : "LogIn"} />
+        {error}
       </form>
+      <span onClick={toggleAccount}>
+        {newAccount ? "Sign In" : "Create Account"}
+      </span>
       <div>
-        <button>continue with Google</button>
+        <button name="google" onClick={onGoogleClick}>
+          continue with Google
+        </button>
       </div>
     </div>
   );
