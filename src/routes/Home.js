@@ -1,6 +1,8 @@
 import { addDoc, collection, onSnapshot, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { dbService } from "../firebase";
+import { dbService, storageService } from "../firebase";
+import { ref, uploadString } from "@firebase/storage";
+import { v4 as uuidv4 } from "uuid";
 
 import Tweet from "../components/Tweet";
 
@@ -22,12 +24,15 @@ const Home = ({ userObj }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    await addDoc(collection(dbService, "tweets"), {
-      text: tweet,
-      createdAt: Date.now(),
-      creatorId: userObj.uid,
-    });
-    setTweet("");
+    const fileRef = ref(storageService, `${userObj.uid}/${uuidv4()}`);
+    const response = await uploadString(fileRef, attachment, "data_url");
+    console.log(response);
+    // await addDoc(collection(dbService, "tweets"), {
+    //   text: tweet,
+    //   createdAt: Date.now(),
+    //   creatorId: userObj.uid,
+    // });
+    // setTweet("");
   };
 
   const onChange = (e) => {
