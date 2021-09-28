@@ -1,15 +1,17 @@
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteObject, ref } from "@firebase/storage";
 import { useState } from "react";
-import { dbService } from "../firebase";
+import { dbService, storageService } from "../firebase";
 
 const Tweet = ({ tweetObj, isOwner }) => {
   const [editing, setEditing] = useState(false);
   const [newTweet, setNewTweet] = useState(tweetObj.text);
 
-  const onDeleteClick = () => {
+  const onDeleteClick = async () => {
     const ok = window.confirm("are you sure you want to delete?");
     if (ok) {
-      deleteDoc(doc(dbService, `tweets/${tweetObj.id}`));
+      await deleteDoc(doc(dbService, `tweets/${tweetObj.id}`));
+      await deleteObject(ref(storageService, tweetObj.attachmentUrl));
     }
   };
 
